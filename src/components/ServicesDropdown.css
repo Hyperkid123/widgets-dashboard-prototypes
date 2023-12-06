@@ -1,0 +1,15 @@
+.chr-c-link-service-toggle {
+  height: 100%;
+  padding-left: 16px;
+}
+
+.chr-c-link-service-toggle.pf-v5-c-menu-toggle::after, .chr-c-link-service-toggle.pf-v5-c-menu-toggle::before {
+  border-bottom: none;
+  border-left: none;
+  border-top: none;
+}
+
+.chr-c-link-service-toggle.pf-v5-c-menu-toggle:hover::after {
+  border-bottom: var(--pf-v5-global--BorderWidth--lg) solid var(--pf-v5-global--info-color--100);
+}
+
