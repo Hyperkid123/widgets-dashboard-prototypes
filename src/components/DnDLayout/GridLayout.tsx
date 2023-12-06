@@ -1,13 +1,15 @@
-import ReactGridLayout from 'react-grid-layout';
+import ReactGridLayout, { ReactGridLayoutProps } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 
 import './GridLayout.css';
-import GridTile, { ExtendedLayoutItem } from './GridTile';
+import GridTile, { ExtendedLayoutItem, SetWidgetAttribute } from './GridTile';
 import { useState } from 'react';
 import { WidgetTypes } from '../Widgets/widgetTypes';
 import {
   widgetDefaultHeight,
   widgetDefaultWidth,
+  widgetMaxHeight,
+  widgetMinHeight,
 } from '../Widgets/widgetDefaults';
 import ResizeHandle from './ResizeHandle';
 
@@ -20,6 +22,10 @@ const initialLayout = [
   { title: 'Widget 1', i: 'SmallWidget#sw2', x: 4, y: 1 },
 ];
 
+function isWidgetType(type: string): type is WidgetTypes {
+  return Object.values(WidgetTypes).includes(type as WidgetTypes);
+}
+
 function getWidgetDefaultSettings(id: string): [WidgetTypes, string] {
   const [widgetType, i] = id.split('#');
   // we will need some type guards here and schema validation to remove unknown widgets
@@ -27,20 +33,58 @@ function getWidgetDefaultSettings(id: string): [WidgetTypes, string] {
 }
 
 const GridLayout = () => {
+  const [isDragging, setIsDragging] = useState(false);
   const [layout, setLayout] = useState<ExtendedLayoutItem[]>(
     initialLayout.map((item) => {
-      const [widgetType, i] = getWidgetDefaultSettings(item.i);
+      const [widgetType] = getWidgetDefaultSettings(item.i);
       return {
         ...item,
-        i,
         w: widgetDefaultWidth[widgetType],
         h: widgetDefaultHeight[widgetType],
+        maxH: widgetMaxHeight[widgetType],
+        minH: widgetMinHeight[widgetType],
         widgetType,
       };
     })
   );
+
+  const setWidgetAttribute: SetWidgetAttribute = (id, attributeName, value) => {
+    setLayout((prev) =>
+      prev.map((item) =>
+        item.i === id ? { ...item, [attributeName]: value } : item
+      )
+    );
+  };
+
+  const removeWidget = (id: string) => {
+    setLayout((prev) => prev.filter((item) => item.i !== id));
+  };
+
+  const onDrop: ReactGridLayoutProps['onDrop'] = (
+    _layout,
+    layoutItem,
+    event
+  ) => {
+    const data = (event as any).dataTransfer.getData('text');
+    if (isWidgetType(data)) {
+      const newWidget = {
+        ...layoutItem,
+        w: widgetDefaultWidth[data],
+        h: widgetDefaultHeight[data],
+        maxH: widgetMaxHeight[data],
+        minH: widgetMinHeight[data],
+        widgetType: data,
+        i: `${data}#${Date.now() + Math.random()}`,
+        title: 'New title',
+      };
+      setLayout((prev) => [...prev, newWidget]);
+    }
+    event.preventDefault();
+  };
+
   return (
-    // relative position is required for the grid layout to properly calculate child translation while dragging is in progress
+    // {/* relative position is required for the grid layout to properly calculate
+    // child translation while dragging is in progress */}
     <div style={{ position: 'relative' }}>
       <ReactGridLayout
         className="layout"
@@ -51,15 +95,26 @@ const GridLayout = () => {
         width={1200}
         resizeHandles={['se', 's', 'sw']}
         resizeHandle={<ResizeHandle />}
+        // add droppping item default based on dragged template
+        // droppingItem={{ i: '__dropping-elem__' }}
+        isDroppable
+        onDrop={onDrop}
         onLayoutChange={(newLayout: ExtendedLayoutItem[]) => {
-          console.log({ newLayout });
-          setLayout(newLayout);
+          setLayout(newLayout.filter(({ i }) => i !== '__dropping-elem__'));
         }}
       >
-        {layout.map(({ i, widgetType, title, ...rest }, index) => (
-          <div key={i} data-grid={rest}>
-            <GridTile title={`Widget ${index}`} id={i} widgetType={widgetType}>
-              {i}
+        {layout.map(({ widgetType, title, ...rest }, index) => (
+          <div key={rest.i} data-grid={rest}>
+            <GridTile
+              isDragging={isDragging}
+              setIsDragging={setIsDragging}
+              title={`Widget ${index}`}
+              widgetType={widgetType}
+              widgetConfig={rest}
+              setWidgetAttribute={setWidgetAttribute}
+              removeWidget={removeWidget}
+            >
+              {rest.i}
             </GridTile>
           </div>
         ))}

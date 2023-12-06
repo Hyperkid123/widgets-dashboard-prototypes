@@ -9,9 +9,17 @@ import {
   Icon,
   MenuToggle,
   MenuToggleElement,
+  Tooltip,
 } from '@patternfly/react-core';
-import { EllipsisVIcon, GripVerticalIcon } from '@patternfly/react-icons';
+import {
+  CompressIcon,
+  EllipsisVIcon,
+  ExpandIcon,
+  GripVerticalIcon,
+  MinusCircleIcon,
+} from '@patternfly/react-icons';
 import React, { Fragment, useMemo, useState } from 'react';
+import clsx from 'clsx';
 
 import './GridTile.css';
 import { Layout } from 'react-grid-layout';
@@ -23,29 +31,96 @@ export type ExtendedLayoutItem = Layout & {
   title: string;
 };
 
+export type SetWidgetAttribute = <T extends string | number | boolean>(
+  id: string,
+  attributeName: keyof ExtendedLayoutItem,
+  value: T
+) => void;
+
 export type GridTileProps = React.PropsWithChildren<{
-  id: string;
   widgetType: WidgetTypes;
   title: string;
+  setIsDragging: (isDragging: boolean) => void;
+  isDragging: boolean;
+  setWidgetAttribute: SetWidgetAttribute;
+  widgetConfig: Layout;
+  removeWidget: (id: string) => void;
 }>;
 
-const GridTile = ({ children, widgetType, title }: GridTileProps) => {
+const GridTile = ({
+  widgetType,
+  title,
+  isDragging,
+  setIsDragging,
+  setWidgetAttribute,
+  widgetConfig,
+  removeWidget,
+}: GridTileProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const Component = widgetMapper[widgetType] || Fragment;
 
   const dropdownItems = useMemo(() => {
+    const isMaximized = widgetConfig.h === widgetConfig.maxH;
+    const isMinimized = widgetConfig.h === widgetConfig.minH;
     return (
       <>
-        <DropdownItem>Action</DropdownItem>
+        <DropdownItem
+          isDisabled={isMaximized}
+          onClick={() => {
+            setWidgetAttribute(
+              widgetConfig.i,
+              'h',
+              widgetConfig.maxH ?? widgetConfig.h
+            );
+            setIsOpen(false);
+          }}
+          icon={<ExpandIcon />}
+        >
+          Maximize height
+        </DropdownItem>
+        <DropdownItem
+          onClick={() => {
+            setWidgetAttribute(
+              widgetConfig.i,
+              'h',
+              widgetConfig.minH ?? widgetConfig.h
+            );
+            setIsOpen(false);
+          }}
+          isDisabled={isMinimized}
+          icon={<CompressIcon />}
+        >
+          Minimize height
+        </DropdownItem>
+        <DropdownItem
+          onClick={() => {
+            removeWidget(widgetConfig.i);
+          }}
+          icon={
+            <Icon status="danger">
+              <MinusCircleIcon />
+            </Icon>
+          }
+        >
+          Remove
+        </DropdownItem>
       </>
     );
-  }, []);
+  }, [
+    widgetConfig.minH,
+    widgetConfig.maxH,
+    widgetConfig.h,
+    widgetConfig.i,
+    setWidgetAttribute,
+  ]);
 
   const headerActions = (
     <>
       <Dropdown
-        onSelect={console.log}
+        popperProps={{
+          appendTo: document.body,
+        }}
         toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
           <MenuToggle
             ref={toggleRef}
@@ -62,15 +137,29 @@ const GridTile = ({ children, widgetType, title }: GridTileProps) => {
       >
         <DropdownList>{dropdownItems}</DropdownList>
       </Dropdown>
-      <Icon className="drag-handle">
-        <GripVerticalIcon style={{ fill: '#6a6e73' }} />
-      </Icon>
+      <Tooltip content={<p>Move widget</p>}>
+        <Icon
+          onMouseDown={() => setIsDragging(true)}
+          onMouseUp={() => setIsDragging(false)}
+          className={clsx('drag-handle', {
+            dragging: isDragging,
+          })}
+        >
+          <GripVerticalIcon style={{ fill: '#6a6e73' }} />
+        </Icon>
+      </Tooltip>
     </>
   );
   return (
     <Card className="grid-tile">
       <CardHeader actions={{ actions: headerActions }}>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle
+          style={{
+            userSelect: isDragging ? 'none' : 'auto',
+          }}
+        >
+          {title}
+        </CardTitle>
       </CardHeader>
       <CardBody>
         <Component></Component>

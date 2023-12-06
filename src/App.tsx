@@ -5,6 +5,7 @@ import { Page, PageSection } from '@patternfly/react-core';
 import PageHeader from './components/PageHeader';
 import Controls from './components/DnDLayout/Controls';
 import GridLayout from './components/DnDLayout/GridLayout';
+import AddWidgetDrawer from './components/DnDLayout/AddWidgetDrawer';
 
 function App() {
   const header = useMemo(() => <PageHeader />, []);
@@ -12,9 +13,11 @@ function App() {
   return (
     <Page header={header}>
       <Controls />
-      <PageSection>
-        <GridLayout />
-      </PageSection>
+      <AddWidgetDrawer>
+        <PageSection>
+          <GridLayout />
+        </PageSection>
+      </AddWidgetDrawer>
     </Page>
   );
 }

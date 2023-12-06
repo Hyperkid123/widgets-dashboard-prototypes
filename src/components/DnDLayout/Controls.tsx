@@ -18,11 +18,14 @@ import {
 import { AddCircleOIcon, LockOpenIcon } from '@patternfly/react-icons';
 import React, { useState } from 'react';
 import FakeTabs from '../FakeTabs';
+import { useAtom } from 'jotai';
+import { drawerExpandedAtom } from '../../state/drawerExpandedAtom';
 
 const DEFAULT_TEXT = 'Config view: devel…deafult';
 
 const Controls = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [, setDrawerExpanded] = useAtom(drawerExpandedAtom);
   const onSelect = (
     _event: React.MouseEvent<Element, MouseEvent> | undefined,
     value: string | number | undefined
@@ -77,7 +80,11 @@ const Controls = () => {
                   </Dropdown>
                 </ToolbarItem>
                 <ToolbarItem>
-                  <Button variant="secondary" icon={<AddCircleOIcon />}>
+                  <Button
+                    onClick={() => setDrawerExpanded(true)}
+                    variant="secondary"
+                    icon={<AddCircleOIcon />}
+                  >
                     Add widgets
                   </Button>
                 </ToolbarItem>
