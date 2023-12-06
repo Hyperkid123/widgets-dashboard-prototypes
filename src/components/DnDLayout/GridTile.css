@@ -1,0 +1,8 @@
+.drag-handle {
+  cursor: grabbing;
+}
+
+.grid-tile {
+  position: relative;
+  height: 100%;
+}

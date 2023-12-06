@@ -1,0 +1,50 @@
+.react-resizable-handle.react-resizable-handle-s::after, .react-resizable-handle.react-resizable-handle-se::after, .react-resizable-handle.react-resizable-handle-sw::after {
+  border: none;
+}
+.react-resizable-handle.react-resizable-handle-s, .react-resizable-handle.react-resizable-handle-se, .react-resizable-handle.react-resizable-handle-sw {
+  transform: none !important;
+  border-top: 1px solid #D2D2D2;
+}
+.react-resizable-handle.react-resizable-handle-s {
+  width: 95%;
+  left: initial !important;
+  margin: 0 !important;
+}
+
+.react-resizable-handle.react-resizable-handle-se {
+  width: 5%;
+  right: 0 !important;
+}
+
+.react-resizable-handle.react-resizable-handle-sw {
+  /* width: 5%; */
+  left: 0 !important;
+}
+
+.react-resizable-handle {
+  height: 10px !important;
+}
+
+.custom-handle {
+  position: absolute;
+  top: var(--pf-v5-c-drawer__splitter-handle--Top);
+  left: var(--pf-v5-c-drawer__splitter-handle--Left);
+  left: 50%;
+  top: 2px
+}
+
+.custom-handle::after {
+  display: block;
+  width: var(--pf-v5-c-drawer__splitter-handle--after--Width);
+  height: var(--pf-v5-c-drawer__splitter-handle--after--Height);
+  content: "";
+  border-color: #6A6E73;
+  border-style: solid;
+  border-width: 1px;
+  bottom: 0;
+  top: 0;
+  width: 12px;
+  height: 2px;
+  border-left: none;
+  border-right: none;
+}

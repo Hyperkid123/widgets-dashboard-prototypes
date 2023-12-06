@@ -1,9 +1,10 @@
-import '@patternfly/react-core/dist/styles/base.css';
+import '@patternfly/patternfly/patternfly.min.css';
 import '@patternfly/patternfly/patternfly-addons.css';
 import { useMemo } from 'react';
-import { Page } from '@patternfly/react-core';
+import { Page, PageSection } from '@patternfly/react-core';
 import PageHeader from './components/PageHeader';
 import Controls from './components/DnDLayout/Controls';
+import GridLayout from './components/DnDLayout/GridLayout';
 
 function App() {
   const header = useMemo(() => <PageHeader />, []);
@@ -11,6 +12,9 @@ function App() {
   return (
     <Page header={header}>
       <Controls />
+      <PageSection>
+        <GridLayout />
+      </PageSection>
     </Page>
   );
 }

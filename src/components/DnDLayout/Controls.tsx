@@ -32,7 +32,7 @@ const Controls = () => {
     setIsOpen(false);
   };
   return (
-    <PageSection className="pf-v5-u-md" variant={PageSectionVariants.light}>
+    <PageSection className="pf-v5-u-pb-0" variant={PageSectionVariants.light}>
       <Level>
         <LevelItem>
           <Title headingLevel="h1" size="2xl">
