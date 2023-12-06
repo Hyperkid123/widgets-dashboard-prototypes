@@ -20,14 +20,16 @@ import widgetMapper from '../Widgets/widgetMapper';
 
 export type ExtendedLayoutItem = Layout & {
   widgetType: WidgetTypes;
+  title: string;
 };
 
 export type GridTileProps = React.PropsWithChildren<{
   id: string;
   widgetType: WidgetTypes;
+  title: string;
 }>;
 
-const GridTile = ({ children, widgetType }: GridTileProps) => {
+const GridTile = ({ children, widgetType, title }: GridTileProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const Component = widgetMapper[widgetType] || Fragment;
@@ -42,9 +44,6 @@ const GridTile = ({ children, widgetType }: GridTileProps) => {
 
   const headerActions = (
     <>
-      <Icon className="drag-handle">
-        <GripVerticalIcon />
-      </Icon>
       <Dropdown
         onSelect={console.log}
         toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
@@ -63,15 +62,18 @@ const GridTile = ({ children, widgetType }: GridTileProps) => {
       >
         <DropdownList>{dropdownItems}</DropdownList>
       </Dropdown>
+      <Icon className="drag-handle">
+        <GripVerticalIcon style={{ fill: '#6a6e73' }} />
+      </Icon>
     </>
   );
   return (
     <Card className="grid-tile">
       <CardHeader actions={{ actions: headerActions }}>
-        <CardTitle>{children}</CardTitle>
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardBody>
-        <Component>{children}</Component>
+        <Component></Component>
       </CardBody>
     </Card>
   );

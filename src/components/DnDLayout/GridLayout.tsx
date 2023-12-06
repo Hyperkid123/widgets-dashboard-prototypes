@@ -11,6 +11,15 @@ import {
 } from '../Widgets/widgetDefaults';
 import ResizeHandle from './ResizeHandle';
 
+const initialLayout = [
+  { title: 'Widget 1', i: 'LargeWidget#lw1', x: 0, y: 0 },
+  { title: 'Widget 1', i: 'LargeWidget#lw2', x: 0, y: 1 },
+  { title: 'Widget 1', i: 'LargeWidget#lw3', x: 0, y: 2 },
+  { title: 'Widget 1', i: 'MediumWidget#mw1', x: 4, y: 2 },
+  { title: 'Widget 1', i: 'SmallWidget#sw1', x: 4, y: 0 },
+  { title: 'Widget 1', i: 'SmallWidget#sw2', x: 4, y: 1 },
+];
+
 function getWidgetDefaultSettings(id: string): [WidgetTypes, string] {
   const [widgetType, i] = id.split('#');
   // we will need some type guards here and schema validation to remove unknown widgets
@@ -19,11 +28,7 @@ function getWidgetDefaultSettings(id: string): [WidgetTypes, string] {
 
 const GridLayout = () => {
   const [layout, setLayout] = useState<ExtendedLayoutItem[]>(
-    [
-      { i: 'LargeWidget#1', x: 0, y: 0 },
-      { i: 'LargeWidget#2', x: 0, y: 1 },
-      { i: 'LargeWidget#3', x: 0, y: 2 },
-    ].map((item) => {
+    initialLayout.map((item) => {
       const [widgetType, i] = getWidgetDefaultSettings(item.i);
       return {
         ...item,
@@ -46,13 +51,14 @@ const GridLayout = () => {
         width={1200}
         resizeHandles={['se', 's', 'sw']}
         resizeHandle={<ResizeHandle />}
-        onLayoutChange={(newLayout: ExtendedLayoutItem[]) =>
-          setLayout(newLayout)
-        }
+        onLayoutChange={(newLayout: ExtendedLayoutItem[]) => {
+          console.log({ newLayout });
+          setLayout(newLayout);
+        }}
       >
-        {layout.map(({ i, widgetType, ...rest }) => (
+        {layout.map(({ i, widgetType, title, ...rest }, index) => (
           <div key={i} data-grid={rest}>
-            <GridTile id={i} widgetType={widgetType}>
+            <GridTile title={`Widget ${index}`} id={i} widgetType={widgetType}>
               {i}
             </GridTile>
           </div>

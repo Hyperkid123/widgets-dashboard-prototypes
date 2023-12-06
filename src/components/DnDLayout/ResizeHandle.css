@@ -23,6 +23,7 @@
 
 .react-resizable-handle {
   height: 10px !important;
+  background-color: white;
 }
 
 .custom-handle {
