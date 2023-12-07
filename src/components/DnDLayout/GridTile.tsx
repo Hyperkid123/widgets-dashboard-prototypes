@@ -43,7 +43,9 @@ export type GridTileProps = React.PropsWithChildren<{
   setIsDragging: (isDragging: boolean) => void;
   isDragging: boolean;
   setWidgetAttribute: SetWidgetAttribute;
-  widgetConfig: Layout;
+  widgetConfig: Layout & {
+    colWidth: number;
+  };
   removeWidget: (id: string) => void;
 }>;
 
@@ -150,12 +152,24 @@ const GridTile = ({
       </Tooltip>
     </>
   );
+
+  const titleWidth = useMemo(
+    // 88px is the width of the actions container
+    // 48px is the width padding on the card title
+    // 16px is the width of the left padding on the actions handle
+    () =>
+      `calc(${widgetConfig.colWidth * widgetConfig.w}px - 88px - 48px - 16px)`,
+    [widgetConfig.colWidth, widgetConfig.w]
+  );
   return (
     <Card className="grid-tile">
       <CardHeader actions={{ actions: headerActions }}>
         <CardTitle
           style={{
             userSelect: isDragging ? 'none' : 'auto',
+            width: titleWidth,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
         >
           {title}

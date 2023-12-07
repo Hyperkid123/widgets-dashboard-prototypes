@@ -94,7 +94,24 @@ const GridLayout = () => {
         i: `${data}#${Date.now() + Math.random()}`,
         title: 'New title',
       };
-      setLayout((prev) => [newWidget, ...prev]);
+      setLayout((prev) =>
+        prev.reduce<ExtendedLayoutItem[]>(
+          (acc, curr) => {
+            if (
+              curr.x + curr.w > newWidget.x &&
+              curr.y + curr.h <= newWidget.y
+            ) {
+              acc.push(curr);
+            } else {
+              // Wee need to push the current items down on the Y axis if they are supposed to be below the new widget
+              acc.push({ ...curr, y: curr.y + curr.h });
+            }
+
+            return acc;
+          },
+          [newWidget]
+        )
+      );
     }
     event.preventDefault();
   };
@@ -120,14 +137,15 @@ const GridLayout = () => {
           setLayout(newLayout.filter(({ i }) => i !== '__dropping-elem__'));
         }}
       >
-        {layout.map(({ widgetType, title, ...rest }, index) => (
+        {layout.map(({ widgetType, title, ...rest }) => (
           <div key={rest.i} data-grid={rest}>
             <GridTile
               isDragging={isDragging}
               setIsDragging={setIsDragging}
-              title={`Widget ${index}`}
+              title={rest.i}
               widgetType={widgetType}
-              widgetConfig={rest}
+              // these will be dynamically calculated once the dimensions are calculated
+              widgetConfig={{ ...rest, colWidth: 1200 / 4 }}
               setWidgetAttribute={setWidgetAttribute}
               removeWidget={removeWidget}
             >

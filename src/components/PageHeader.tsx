@@ -43,13 +43,13 @@ const kebabDropdownItems = (
   </>
 );
 
-const userDropdownItems = [
+const userDropdownItems = (
   <>
     <DropdownItem key="group 2 profile">My profile</DropdownItem>
     <DropdownItem key="group 2 user">User management</DropdownItem>
     <DropdownItem key="group 2 logout">Logout</DropdownItem>
-  </>,
-];
+  </>
+);
 
 const HeaderToolbar = () => {
   const [isKebabDropdownOpen, setIsKebabDropdownOpen] = useState(false);
