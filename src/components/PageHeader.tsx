@@ -178,7 +178,7 @@ const PageHeader = () => {
   return (
     <Masthead>
       <MastheadMain>
-        <MastheadBrand href="https://patternfly.org" target="_blank">
+        <MastheadBrand href="/">
           <Brand style={{ width: 208 }} src={logo} alt="Red Hat Logo" />
         </MastheadBrand>
       </MastheadMain>

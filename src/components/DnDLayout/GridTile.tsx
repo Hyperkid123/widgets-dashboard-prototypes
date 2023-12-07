@@ -29,6 +29,7 @@ import widgetMapper from '../Widgets/widgetMapper';
 export type ExtendedLayoutItem = Layout & {
   widgetType: WidgetTypes;
   title: string;
+  locked?: boolean;
 };
 
 export type SetWidgetAttribute = <T extends string | number | boolean>(
@@ -45,6 +46,7 @@ export type GridTileProps = React.PropsWithChildren<{
   setWidgetAttribute: SetWidgetAttribute;
   widgetConfig: Layout & {
     colWidth: number;
+    locked?: boolean;
   };
   removeWidget: (id: string) => void;
 }>;
@@ -158,12 +160,16 @@ const GridTile = ({
     // 48px is the width padding on the card title
     // 16px is the width of the left padding on the actions handle
     () =>
-      `calc(${widgetConfig.colWidth * widgetConfig.w}px - 88px - 48px - 16px)`,
-    [widgetConfig.colWidth, widgetConfig.w]
+      `calc(${widgetConfig.colWidth * widgetConfig.w}px - 48px${
+        widgetConfig.locked ? '' : ' - 88px - 16px'
+      })`,
+    [widgetConfig.colWidth, widgetConfig.w, widgetConfig.locked]
   );
   return (
     <Card className="grid-tile">
-      <CardHeader actions={{ actions: headerActions }}>
+      <CardHeader
+        actions={{ actions: widgetConfig.locked ? undefined : headerActions }}
+      >
         <CardTitle
           style={{
             userSelect: isDragging ? 'none' : 'auto',

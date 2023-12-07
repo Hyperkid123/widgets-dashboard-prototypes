@@ -14,41 +14,15 @@ import {
 import ResizeHandle from './ResizeHandle';
 import { useAtom, useAtomValue } from 'jotai';
 import { currentDropInItemAtom } from '../../state/currentDropInItemAtom';
-
-const initialLayout = [
-  { title: 'Widget 1', i: 'LargeWidget#lw1', x: 0, y: 0 },
-  { title: 'Widget 1', i: 'LargeWidget#lw2', x: 0, y: 1 },
-  { title: 'Widget 1', i: 'LargeWidget#lw3', x: 0, y: 2 },
-  { title: 'Widget 1', i: 'MediumWidget#mw1', x: 4, y: 2 },
-  { title: 'Widget 1', i: 'SmallWidget#sw1', x: 4, y: 0 },
-  { title: 'Widget 1', i: 'SmallWidget#sw2', x: 4, y: 1 },
-];
+import { layoutAtom } from '../../state/layoutAtom';
 
 function isWidgetType(type: string): type is WidgetTypes {
   return Object.values(WidgetTypes).includes(type as WidgetTypes);
 }
 
-function getWidgetDefaultSettings(id: string): [WidgetTypes, string] {
-  const [widgetType, i] = id.split('#');
-  // we will need some type guards here and schema validation to remove unknown widgets
-  return [widgetType as WidgetTypes, i];
-}
-
-const GridLayout = () => {
+const GridLayout = ({ isLocked = false }: { isLocked?: boolean }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [layout, setLayout] = useState<ExtendedLayoutItem[]>(
-    initialLayout.map((item) => {
-      const [widgetType] = getWidgetDefaultSettings(item.i);
-      return {
-        ...item,
-        w: widgetDefaultWidth[widgetType],
-        h: widgetDefaultHeight[widgetType],
-        maxH: widgetMaxHeight[widgetType],
-        minH: widgetMinHeight[widgetType],
-        widgetType,
-      };
-    })
-  );
+  const [layout, setLayout] = useAtom(layoutAtom);
 
   const currentDropInItem = useAtomValue(currentDropInItemAtom);
   const droppingItemTemplate: ReactGridLayoutProps['droppingItem'] =
@@ -94,6 +68,7 @@ const GridLayout = () => {
         i: `${data}#${Date.now() + Math.random()}`,
         title: 'New title',
       };
+      console.log({ newWidget });
       setLayout((prev) =>
         prev.reduce<ExtendedLayoutItem[]>(
           (acc, curr) => {
@@ -116,6 +91,15 @@ const GridLayout = () => {
     event.preventDefault();
   };
 
+  const activeLayout = useMemo(
+    () =>
+      layout.map((item) => ({
+        ...item,
+        locked: isLocked,
+      })),
+    [isLocked, layout]
+  );
+
   return (
     // {/* relative position is required for the grid layout to properly calculate
     // child translation while dragging is in progress */}
@@ -123,21 +107,29 @@ const GridLayout = () => {
       <ReactGridLayout
         className="layout"
         draggableHandle=".drag-handle"
-        layout={layout}
+        layout={activeLayout}
+        // autoSize={isLocked}
         cols={4}
         rowHeight={88}
         width={1200}
+        isDraggable={!isLocked}
+        isResizable={!isLocked}
         resizeHandles={['se', 's', 'sw']}
         resizeHandle={<ResizeHandle />}
         // add droppping item default based on dragged template
         droppingItem={droppingItemTemplate}
-        isDroppable
+        isDroppable={!isLocked}
         onDrop={onDrop}
+        useCSSTransforms
+        verticalCompact
         onLayoutChange={(newLayout: ExtendedLayoutItem[]) => {
+          if (isLocked) {
+            return;
+          }
           setLayout(newLayout.filter(({ i }) => i !== '__dropping-elem__'));
         }}
       >
-        {layout.map(({ widgetType, title, ...rest }) => (
+        {activeLayout.map(({ widgetType, title, ...rest }) => (
           <div key={rest.i} data-grid={rest}>
             <GridTile
               isDragging={isDragging}
