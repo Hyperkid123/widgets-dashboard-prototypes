@@ -3,7 +3,7 @@ import 'react-grid-layout/css/styles.css';
 
 import './GridLayout.css';
 import GridTile, { ExtendedLayoutItem, SetWidgetAttribute } from './GridTile';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { WidgetTypes } from '../Widgets/widgetTypes';
 import {
   widgetDefaultHeight,
@@ -12,6 +12,8 @@ import {
   widgetMinHeight,
 } from '../Widgets/widgetDefaults';
 import ResizeHandle from './ResizeHandle';
+import { useAtom, useAtomValue } from 'jotai';
+import { currentDropInItemAtom } from '../../state/currentDropInItemAtom';
 
 const initialLayout = [
   { title: 'Widget 1', i: 'LargeWidget#lw1', x: 0, y: 0 },
@@ -48,6 +50,20 @@ const GridLayout = () => {
     })
   );
 
+  const currentDropInItem = useAtomValue(currentDropInItemAtom);
+  const droppingItemTemplate: ReactGridLayoutProps['droppingItem'] =
+    useMemo(() => {
+      if (currentDropInItem) {
+        return {
+          i: '__dropping-elem__',
+          w: widgetDefaultWidth[currentDropInItem],
+          h: widgetDefaultHeight[currentDropInItem],
+          widgetType: currentDropInItem,
+          title: 'New title',
+        };
+      }
+    }, [currentDropInItem]);
+
   const setWidgetAttribute: SetWidgetAttribute = (id, attributeName, value) => {
     setLayout((prev) =>
       prev.map((item) =>
@@ -66,6 +82,7 @@ const GridLayout = () => {
     event
   ) => {
     const data = (event as any).dataTransfer.getData('text');
+    // fix placement order
     if (isWidgetType(data)) {
       const newWidget = {
         ...layoutItem,
@@ -77,7 +94,7 @@ const GridLayout = () => {
         i: `${data}#${Date.now() + Math.random()}`,
         title: 'New title',
       };
-      setLayout((prev) => [...prev, newWidget]);
+      setLayout((prev) => [newWidget, ...prev]);
     }
     event.preventDefault();
   };
@@ -96,7 +113,7 @@ const GridLayout = () => {
         resizeHandles={['se', 's', 'sw']}
         resizeHandle={<ResizeHandle />}
         // add droppping item default based on dragged template
-        // droppingItem={{ i: '__dropping-elem__' }}
+        droppingItem={droppingItemTemplate}
         isDroppable
         onDrop={onDrop}
         onLayoutChange={(newLayout: ExtendedLayoutItem[]) => {

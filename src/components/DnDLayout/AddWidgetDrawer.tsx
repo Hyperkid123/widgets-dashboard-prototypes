@@ -16,12 +16,15 @@ import {
   Title,
   Tooltip,
 } from '@patternfly/react-core';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import React from 'react';
 import { drawerExpandedAtom } from '../../state/drawerExpandedAtom';
 import { GripVerticalIcon } from '@patternfly/react-icons';
 import LargeWidget from '../Widgets/LargeWidget';
 import { WidgetTypes } from '../Widgets/widgetTypes';
+import { currentDropInItemAtom } from '../../state/currentDropInItemAtom';
+import MediumWidget from '../Widgets/MediumWidget';
+import SmallWidget from '../Widgets/SmallWidget';
 
 export type AddWidgetDrawerProps = React.PropsWithChildren<{}>;
 
@@ -30,6 +33,7 @@ const WidgetWrapper = ({
   children,
   widgetType,
 }: React.PropsWithChildren<{ title: string; widgetType: WidgetTypes }>) => {
+  const setDropInItem = useSetAtom(currentDropInItemAtom);
   const headerActions = (
     <Tooltip content={<p>Move widget</p>}>
       <Icon>
@@ -39,7 +43,10 @@ const WidgetWrapper = ({
   );
   return (
     <Card
-      onDragStart={(e) => e.dataTransfer.setData('text', widgetType)}
+      onDragStart={(e) => {
+        e.dataTransfer.setData('text', widgetType);
+        setDropInItem(widgetType);
+      }}
       // eslint-disable-next-line react/no-unknown-property
       unselectable="on"
       draggable={true}
@@ -71,6 +78,22 @@ const AddWidgetDrawer = ({ children }: AddWidgetDrawerProps) => {
             title="Large widget"
           >
             <LargeWidget />
+          </WidgetWrapper>
+        </ListItem>
+        <ListItem>
+          <WidgetWrapper
+            widgetType={WidgetTypes.MediumWidget}
+            title="Medium widget"
+          >
+            <MediumWidget />
+          </WidgetWrapper>
+        </ListItem>
+        <ListItem>
+          <WidgetWrapper
+            widgetType={WidgetTypes.SmallWidget}
+            title="Small widget"
+          >
+            <SmallWidget />
           </WidgetWrapper>
         </ListItem>
       </List>
