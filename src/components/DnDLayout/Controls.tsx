@@ -12,11 +12,11 @@ import {
 } from '@patternfly/react-core';
 import { AddCircleOIcon } from '@patternfly/react-icons';
 import FakeTabs from '../FakeTabs';
-import { useAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import { drawerExpandedAtom } from '../../state/drawerExpandedAtom';
 
 const Controls = () => {
-  const [, setDrawerExpanded] = useAtom(drawerExpandedAtom);
+  const setDrawerExpanded = useSetAtom(drawerExpandedAtom);
   return (
     <PageSection className="pf-v5-u-pb-0" variant={PageSectionVariants.light}>
       <Level>
@@ -34,7 +34,7 @@ const Controls = () => {
               <ToolbarGroup>
                 <ToolbarItem>
                   <Button
-                    onClick={() => setDrawerExpanded(true)}
+                    onClick={() => setDrawerExpanded((prev) => !prev)}
                     variant="secondary"
                     icon={<AddCircleOIcon />}
                   >

@@ -60,7 +60,9 @@ const GridLayout = ({ isLocked = false }: { isLocked?: boolean }) => {
     if (isWidgetType(data)) {
       const newWidget = {
         ...layoutItem,
-        w: widgetDefaultWidth[data],
+        // w: layoutItem.x + layoutItem.w > 3 ? 1 : 3,
+        // x: 4 % layoutItem.w,
+        // x: layoutItem.x + layoutItem.w > 3 ? 3 : 0,
         h: widgetDefaultHeight[data],
         maxH: widgetMaxHeight[data],
         minH: widgetMinHeight[data],
@@ -68,7 +70,6 @@ const GridLayout = ({ isLocked = false }: { isLocked?: boolean }) => {
         i: `${data}#${Date.now() + Math.random()}`,
         title: 'New title',
       };
-      console.log({ newWidget });
       setLayout((prev) =>
         prev.reduce<ExtendedLayoutItem[]>(
           (acc, curr) => {

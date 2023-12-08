@@ -26,7 +26,9 @@ import { currentDropInItemAtom } from '../../state/currentDropInItemAtom';
 import MediumWidget from '../Widgets/MediumWidget';
 import SmallWidget from '../Widgets/SmallWidget';
 
-export type AddWidgetDrawerProps = React.PropsWithChildren<{}>;
+export type AddWidgetDrawerProps = React.PropsWithChildren<{
+  dismissible?: boolean;
+}>;
 
 const WidgetWrapper = ({
   title,
@@ -59,7 +61,10 @@ const WidgetWrapper = ({
   );
 };
 
-const AddWidgetDrawer = ({ children }: AddWidgetDrawerProps) => {
+const AddWidgetDrawer = ({
+  children,
+  dismissible: dismissible = true,
+}: AddWidgetDrawerProps) => {
   const [isExpanded, setIsExpanded] = useAtom(drawerExpandedAtom);
   const panelContent = (
     <DrawerPanelContent>
@@ -67,9 +72,12 @@ const AddWidgetDrawer = ({ children }: AddWidgetDrawerProps) => {
         <Title headingLevel="h2" size="xl">
           Add widgets
         </Title>
-        <DrawerActions>
-          <DrawerCloseButton onClick={() => setIsExpanded(false)} />
-        </DrawerActions>
+
+        {dismissible ? (
+          <DrawerActions>
+            <DrawerCloseButton onClick={() => setIsExpanded(false)} />
+          </DrawerActions>
+        ) : null}
       </DrawerHead>
       <List isPlain>
         <ListItem>

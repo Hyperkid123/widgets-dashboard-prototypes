@@ -10,7 +10,7 @@ const DefaultLocked = () => {
   return (
     <>
       <LockedControls />
-      <AddWidgetDrawer>
+      <AddWidgetDrawer dismissible={false}>
         <PageSection>
           <GridLayout isLocked={isLocked} />
         </PageSection>
