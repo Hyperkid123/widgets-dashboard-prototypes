@@ -10,7 +10,7 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { AddCircleOIcon } from '@patternfly/react-icons';
+import { PanelOpenIcon } from '@patternfly/react-icons';
 import FakeTabs from '../FakeTabs';
 import { useSetAtom } from 'jotai';
 import { drawerExpandedAtom } from '../../state/drawerExpandedAtom';
@@ -36,7 +36,8 @@ const Controls = () => {
                   <Button
                     onClick={() => setDrawerExpanded((prev) => !prev)}
                     variant="secondary"
-                    icon={<AddCircleOIcon />}
+                    iconPosition="right"
+                    icon={<PanelOpenIcon />}
                   >
                     Add widgets
                   </Button>

@@ -1,25 +1,20 @@
 import {
+  Button,
   Card,
-  CardBody,
   CardHeader,
   CardTitle,
-  Drawer,
-  DrawerActions,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerContentBody,
-  DrawerHead,
-  DrawerPanelContent,
+  Gallery,
+  GalleryItem,
   Icon,
-  List,
-  ListItem,
+  Level,
+  LevelItem,
   Title,
   Tooltip,
 } from '@patternfly/react-core';
 import { useAtom, useSetAtom } from 'jotai';
 import React from 'react';
 import { drawerExpandedAtom } from '../../state/drawerExpandedAtom';
-import { GripVerticalIcon } from '@patternfly/react-icons';
+import { CloseIcon, GripVerticalIcon, PlusIcon } from '@patternfly/react-icons';
 import LargeWidget from '../Widgets/LargeWidget';
 import { WidgetTypes } from '../Widgets/widgetTypes';
 import { currentDropInItemAtom } from '../../state/currentDropInItemAtom';
@@ -32,7 +27,6 @@ export type AddWidgetDrawerProps = React.PropsWithChildren<{
 
 const WidgetWrapper = ({
   title,
-  children,
   widgetType,
 }: React.PropsWithChildren<{ title: string; widgetType: WidgetTypes }>) => {
   const setDropInItem = useSetAtom(currentDropInItemAtom);
@@ -46,6 +40,14 @@ const WidgetWrapper = ({
   return (
     <Card
       onDragStart={(e) => {
+        // @ts-ignore
+        const nodeRect = e.target.getBoundingClientRect();
+        e.dataTransfer.setDragImage(
+          e.target as HTMLDivElement,
+          // mess with this to set the drag image and proper mouse position
+          e.clientX - nodeRect.left,
+          e.clientY - nodeRect.top
+        );
         e.dataTransfer.setData('text', widgetType);
         setDropInItem(widgetType);
       }}
@@ -56,66 +58,66 @@ const WidgetWrapper = ({
       <CardHeader actions={{ actions: headerActions }}>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardBody>{children}</CardBody>
     </Card>
   );
 };
 
-const AddWidgetDrawer = ({
-  children,
-  dismissible: dismissible = true,
-}: AddWidgetDrawerProps) => {
+const AddWidgetDrawer = ({ children }: AddWidgetDrawerProps) => {
   const [isExpanded, setIsExpanded] = useAtom(drawerExpandedAtom);
   const panelContent = (
-    <DrawerPanelContent>
-      <DrawerHead title="Add widgets">
-        <Title headingLevel="h2" size="xl">
-          Add widgets
-        </Title>
-
-        {dismissible ? (
-          <DrawerActions>
-            <DrawerCloseButton onClick={() => setIsExpanded(false)} />
-          </DrawerActions>
-        ) : null}
-      </DrawerHead>
-      <List isPlain>
-        <ListItem>
+    <div
+      style={{
+        backgroundColor: '#E7F1FA',
+      }}
+    >
+      <Level className="pf-v5-u-p-md">
+        <LevelItem>
+          <Title headingLevel="h2" size="md">
+            <PlusIcon className="pf-v5-u-mr-sm" />
+            Add widgets
+          </Title>
+        </LevelItem>
+        <LevelItem>
+          <Button
+            variant="plain"
+            onClick={() => setIsExpanded(false)}
+            icon={<CloseIcon />}
+          />
+        </LevelItem>
+      </Level>
+      <Gallery hasGutter className="pf-v5-u-p-md">
+        <GalleryItem>
           <WidgetWrapper
             widgetType={WidgetTypes.LargeWidget}
             title="Large widget"
           >
             <LargeWidget />
           </WidgetWrapper>
-        </ListItem>
-        <ListItem>
+        </GalleryItem>
+        <GalleryItem>
           <WidgetWrapper
             widgetType={WidgetTypes.MediumWidget}
             title="Medium widget"
           >
             <MediumWidget />
           </WidgetWrapper>
-        </ListItem>
-        <ListItem>
+        </GalleryItem>
+        <GalleryItem>
           <WidgetWrapper
             widgetType={WidgetTypes.SmallWidget}
             title="Small widget"
           >
             <SmallWidget />
           </WidgetWrapper>
-        </ListItem>
-      </List>
-    </DrawerPanelContent>
+        </GalleryItem>
+      </Gallery>
+    </div>
   );
   return (
-    <Drawer isExpanded={isExpanded}>
-      <DrawerContent
-        style={{ background: 'transparent' }}
-        panelContent={panelContent}
-      >
-        <DrawerContentBody>{children}</DrawerContentBody>
-      </DrawerContent>
-    </Drawer>
+    <>
+      {isExpanded ? <div>{panelContent}</div> : null}
+      {children}
+    </>
   );
 };
 
