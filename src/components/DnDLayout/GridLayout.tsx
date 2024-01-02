@@ -11,7 +11,6 @@ import {
   widgetMaxHeight,
   widgetMinHeight,
 } from '../Widgets/widgetDefaults';
-import ResizeHandle from './ResizeHandle';
 import { useAtom, useAtomValue } from 'jotai';
 import { currentDropInItemAtom } from '../../state/currentDropInItemAtom';
 import { layoutAtom } from '../../state/layoutAtom';
@@ -115,8 +114,7 @@ const GridLayout = ({ isLocked = false }: { isLocked?: boolean }) => {
         width={1200}
         isDraggable={!isLocked}
         isResizable={!isLocked}
-        resizeHandles={['se', 's', 'sw']}
-        resizeHandle={<ResizeHandle />}
+        resizeHandles={['se']}
         // add droppping item default based on dragged template
         droppingItem={droppingItemTemplate}
         isDroppable={!isLocked}
