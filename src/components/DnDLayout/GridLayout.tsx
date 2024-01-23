@@ -3,7 +3,14 @@ import 'react-grid-layout/css/styles.css';
 
 import './GridLayout.css';
 import GridTile, { ExtendedLayoutItem, SetWidgetAttribute } from './GridTile';
-import { useMemo, useState } from 'react';
+import {
+  KeyboardEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { WidgetTypes } from '../Widgets/widgetTypes';
 import {
   widgetDefaultHeight,
@@ -11,9 +18,11 @@ import {
   widgetMaxHeight,
   widgetMinHeight,
 } from '../Widgets/widgetDefaults';
-import { useAtom, useAtomValue } from 'jotai';
+import { atom, useAtom, useAtomValue } from 'jotai';
 import { currentDropInItemAtom } from '../../state/currentDropInItemAtom';
 import { layoutAtom } from '../../state/layoutAtom';
+
+const activeItemAtom = atom<string | undefined>(undefined);
 
 function isWidgetType(type: string): type is WidgetTypes {
   return Object.values(WidgetTypes).includes(type as WidgetTypes);
@@ -22,6 +31,8 @@ function isWidgetType(type: string): type is WidgetTypes {
 const GridLayout = ({ isLocked = false }: { isLocked?: boolean }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [layout, setLayout] = useAtom(layoutAtom);
+  const [activeItem, setActiveItem] = useAtom(activeItemAtom);
+  const layoutRef = useRef<HTMLDivElement>(null);
 
   const currentDropInItem = useAtomValue(currentDropInItemAtom);
   const droppingItemTemplate: ReactGridLayoutProps['droppingItem'] =
@@ -100,10 +111,105 @@ const GridLayout = ({ isLocked = false }: { isLocked?: boolean }) => {
     [isLocked, layout]
   );
 
+  const handleKeyboard = (event: KeyboardEvent<HTMLDivElement>, id: string) => {
+    if (event.code === 'Enter') {
+      event.preventDefault();
+      event.stopPropagation();
+      setActiveItem((prev) => {
+        if (prev === id) {
+          return undefined;
+        }
+        return id;
+      });
+    }
+  };
+
+  const handleArrows = useCallback(
+    (e: globalThis.KeyboardEvent) => {
+      if (!activeItem) {
+        return;
+      }
+
+      const item = layout.find(({ i }) => i === activeItem);
+      if (!item) {
+        return;
+      }
+
+      e.stopPropagation();
+      e.preventDefault();
+
+      if (e.code === 'ArrowUp') {
+        setLayout((prev) =>
+          prev.map((layoutItem) => {
+            if (layoutItem.i === activeItem) {
+              return {
+                ...layoutItem,
+                y: Math.max(layoutItem.y - 1, 0),
+              };
+            }
+            return layoutItem;
+          })
+        );
+      }
+
+      if (e.code === 'ArrowDown') {
+        setLayout((prev) =>
+          prev.map((layoutItem) => {
+            if (layoutItem.i === activeItem) {
+              return {
+                ...layoutItem,
+                y: layoutItem.y + 1,
+              };
+            }
+            return layoutItem;
+          })
+        );
+      }
+
+      if (e.code === 'ArrowLeft') {
+        setLayout((prev) =>
+          prev.map((layoutItem) => {
+            if (layoutItem.i === activeItem) {
+              return {
+                ...layoutItem,
+                x: Math.max(layoutItem.x - 1, 0),
+              };
+            }
+            return layoutItem;
+          })
+        );
+      }
+
+      if (e.code === 'ArrowRight') {
+        setLayout((prev) =>
+          prev.map((layoutItem) => {
+            if (layoutItem.i === activeItem) {
+              return {
+                ...layoutItem,
+                x: layoutItem.x + 1,
+              };
+            }
+            return layoutItem;
+          })
+        );
+      }
+    },
+    [activeItem]
+  );
+
+  useEffect(() => {
+    if (activeItem && layoutRef.current) {
+      layoutRef.current.addEventListener('keydown', handleArrows);
+    }
+    return () => {
+      layoutRef.current?.removeEventListener('keydown', handleArrows);
+    };
+  }, [activeItem]);
+
   return (
     // {/* relative position is required for the grid layout to properly calculate
     // child translation while dragging is in progress */}
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative' }} ref={layoutRef}>
       <ReactGridLayout
         className="layout"
         draggableHandle=".drag-handle"
@@ -128,8 +234,17 @@ const GridLayout = ({ isLocked = false }: { isLocked?: boolean }) => {
           setLayout(newLayout.filter(({ i }) => i !== '__dropping-elem__'));
         }}
       >
-        {activeLayout.map(({ widgetType, title, ...rest }) => (
-          <div key={rest.i} data-grid={rest}>
+        {activeLayout.map(({ widgetType, title, ...rest }, index) => (
+          <div
+            key={rest.i}
+            data-grid={rest}
+            onKeyUp={(e) => handleKeyboard(e, rest.i)}
+            tabIndex={index}
+            style={{
+              boxShadow: activeItem === rest.i ? '0 0 2px 2px #2684FF' : 'none',
+              ...(activeItem === rest.i ? { outline: 'none' } : {}),
+            }}
+          >
             <GridTile
               isDragging={isDragging}
               setIsDragging={setIsDragging}
